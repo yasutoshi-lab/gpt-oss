@@ -2,7 +2,9 @@
 
 ## <u>概要</u>
 
-openai/gpt-oss-20b, 120bのアーキテクチャをもとに、簡易的なモデルを再現するためのリポジトリです  
+- openai/gpt-oss-20b, 120bのアーキテクチャをもとに、簡易的なモデルを再現するためのリポジトリです  
+- Tokenizer, MoEの実装は最低限で実装し、次トークンの予測ができるかどうかのみ確認するのが目的です  
+(※生成トークンの殆どが'<UNK>'トークンに置き換わります)
 
 <img src=gpt-oss-20b.png width=500>
 
@@ -53,8 +55,11 @@ uv venv --python 3.12.3
 # 仮想環境適用
 source .venv/bin/activate
 
-# 依存関係インストール
+# ライブラリの同期 
 uv sync
+
+# 最適なPytorchバージョンのインストール
+uv pip install torch --torch-backend=auto
 ```
 
 - 訓練の実行
@@ -105,7 +110,7 @@ uv sync
     },
 
     // --- 学習 ---
-    "epochs": 10,
+    "epochs": 3,
     "batch_size": 5,
     "max_seq_length": 128,
     "gradient_clip_norm": 1.0,

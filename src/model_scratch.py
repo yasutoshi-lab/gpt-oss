@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-"""
-GPT-OSS Compact Implementation
-RTX 4090 (16GB) 向けに最適化されたGPT-OSS同構造モデル
-
-Hardware Target:
-- GPU: RTX 4090 16GB VRAM
-- RAM: 62GB
-- Parameters: ~500M (vs original 20B)
-- Training Memory: ~12GB
-- Inference Memory: ~4GB
-"""
-
 import json
 import math
 import os
@@ -274,7 +261,7 @@ class GroupedQueryAttention(nn.Module):
             mask = self._create_sliding_mask(q_len, kv_len, start_pos)
             scores = scores.masked_fill(mask.unsqueeze(0).unsqueeze(0), float('-inf'))
         
-        # Attention Sink - 一時的に無効化してテスト
+        # # Attention Sink - 一時的に無効化してテスト
         # if start_pos == 0 and kv_len > 1:
         #     sink_scores = self.sinks.view(1, -1, 1, 1)  # [1, num_heads, 1, 1]
         #     # scoresの実際のヘッド数に合わせる
@@ -354,7 +341,7 @@ class MoEBlock(nn.Module):
             bias=False, device=device, dtype=torch.bfloat16
         )
         
-        # 専門家の重み（簡略化実装）
+        # 専門家の重み（簡略実装）
         # 実際は各専門家ごとに分離した重みを持つが、メモリ効率のため統合実装
         self.expert_weights = nn.Parameter(
             torch.randn(config.num_experts, config.intermediate_size * 2, 
@@ -598,7 +585,7 @@ class GPTOSSCompact(nn.Module):
                 # 生成トークン追加
                 generated = torch.cat([generated, next_token], dim=-1)
                 
-                # 停止条件（EOS token等）
+                # # 停止条件（EOS token等）
                 # if next_token.item() == eos_token_id:
                 #     break
         
@@ -618,8 +605,8 @@ class GPTOSSCompact(nn.Module):
 
 class SimpleTokenizer:
     """
-    簡単なトークナイザ（デモ用）
-    実際の用途では tiktoken や HuggingFace tokenizers を使用
+    簡易的な文字単位のトークナイザ（デモ用）
+    実際の用途では tiktoken や HuggingFace tokenizers の利用を推奨
     """
     def __init__(self, vocab_size: int = 50000):
         self.vocab_size = vocab_size
@@ -691,7 +678,7 @@ class TextDataset(Dataset):
     def __getitem__(self, idx):
         tokens = self.examples[idx]
         
-        # 入力と正解ラベル（1つずらし）
+        # 入力と正解ラベル（因果モデルの為、1つずらして入力と正解ラベルを作成）
         input_ids = torch.tensor(tokens[:-1], dtype=torch.long)
         labels = torch.tensor(tokens[1:], dtype=torch.long)
         
@@ -794,7 +781,7 @@ class GPTTrainer:
                 num_batches += 1
                 
                 # ログ出力
-                if step % 10 == 0:
+                if step % 1 == 0:
                     print(f"Epoch {epoch}, Step {step}: "
                           f"Loss={metrics['loss']:.4f}, "
                           f"PPL={metrics['perplexity']:.2f}, "
@@ -824,7 +811,6 @@ class GPTTrainer:
 def main():
     """メイン実行関数 - デモンストレーション"""
     print("=== GPT-OSS Compact Demo ===")
-    print("RTX 4090 16GB optimized implementation")
     
     # デバイス設定
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

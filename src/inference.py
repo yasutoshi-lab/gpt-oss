@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-"""
-GPT-OSS Compact Inference Test
-gpt_oss_compact.ptモデルを使用した推論テスト
-
-  # 全テスト実行
-  python3 add_documents/inference.py --model gpt_oss_compact.pt
-
-  # 単一プロンプトテスト
-  python3 add_documents/inference.py --model gpt_oss_compact.pt --prompt "Hello world" --max-tokens 20
-
-"""
-
 import os
 import sys
 import json

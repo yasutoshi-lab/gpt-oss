@@ -190,8 +190,8 @@ sudo apt-get install -y nvidia-open
 
 ## <u>リファレンス</u>
 
-[GitHub OpenAI/GPT-OSS](https://github.com/openai/gpt-oss)
-[OpenAI GPT-OSSの紹介](https://openai.com/index/introducing-gpt-oss/)
-[OpenAI GPT-OSSのモデルカード](https://cdn.openai.com/pdf/419b6906-9da6-406c-a19d-1bb078ac7637/oai_gpt-oss_model_card.pdf)
-[HuggingFace OpenAI/GPT-OSS-20B](https://huggingface.co/openai/gpt-oss-20b)
-[HuggingFace OpenAI/GPT-OSS-120B](https://huggingface.co/openai/gpt-oss-120b)
+[GitHub OpenAI/GPT-OSS](https://github.com/openai/gpt-oss)　　
+[OpenAI GPT-OSSの紹介](https://openai.com/index/introducing-gpt-oss/)　　
+[OpenAI GPT-OSSのモデルカード](https://cdn.openai.com/pdf/419b6906-9da6-406c-a19d-1bb078ac7637/oai_gpt-oss_model_card.pdf)　　
+[HuggingFace OpenAI/GPT-OSS-20B](https://huggingface.co/openai/gpt-oss-20b)　　
+[HuggingFace OpenAI/GPT-OSS-120B](https://huggingface.co/openai/gpt-oss-120b)　　

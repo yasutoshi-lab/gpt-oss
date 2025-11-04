@@ -11,14 +11,17 @@
 ## <u>構成</u>
 
 ```bash
-gpt-oss
+gpt-oss/
+├── Dockerfile # DockerImage作成用
 ├── README.md
 ├── gpt-oss-20b.png # gpt-oss-20bアーキテクチャ画像
-├── pyproject.toml
-└── src
-    ├── inference.py  # 推論スクリプト
-    ├── model_scratch.py # 訓練スクリプト
-    └── sample_text.txt # 500件のサンプルデータセット
+├── pyproject.toml 
+├── requirements.txt # python3-venvのライブラリインストール用
+├── src
+│   ├── inference.py # 推論スクリプト
+│   ├── model_scratch.py # 訓練スクリプト
+│   └── sample_text.txt # 500件のサンプルデータセット
+└── uv.lock
 ```
 
 ## <u>検証環境</u>
@@ -57,9 +60,6 @@ source .venv/bin/activate
 
 # ライブラリの同期 
 uv sync
-
-# 最適なPytorchバージョンのインストール
-uv pip install torch --torch-backend=auto
 ```
 
 - 訓練の実行
@@ -121,12 +121,14 @@ uv pip install torch --torch-backend=auto
 ```
 
 ```bash
+# 訓練スクリプトの実行
 uv run src/model_scratch.py
 ```
 
 - 推論の実行
 
 ```bash
+# 推論スクリプトの実行(オプション付き)
 uv run src/inference.py --model gpt_oss_compact.pt --prompt 'GPT models are' --max-tokens 20
 ```
 
@@ -186,6 +188,123 @@ sudo apt-get -y install cuda-toolkit-12-9
 
 # NVIDIA Driver Installer
 sudo apt-get install -y nvidia-open
+```
+
+## <u>Dockerセットアップ</u>
+
+- コンテナーイメージの作成と実行
+
+```bash
+# コンテナーイメージの作成
+docker build -t gpt-oss .
+
+# コンテナーの実行
+docker run -it --gpus all gpt-oss /bin/bash
+```
+
+- 訓練の実行
+
+```bash
+#  訓練スクリプトの実行
+python3 src/model_scratch.py
+```
+
+- 推論の実行
+
+```bash
+# 推論スクリプトの実行(オプション付き)
+uv run src/inference.py --model gpt_oss_compact.pt --prompt 'GPT models are' --max-tokens 20
+```
+
+## <u>環境構築: Docker</u>
+
+※下記スクリプトは検証環境のシステム要件に従ったものです。実際の環境に合わせてインストールしてください  
+[Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+```bash
+# install docker packages
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# change permission
+sudo groupadd docker
+sudo usermod -aG docker $USER # Please sign out and sign in.
+```
+
+## <u>環境構築: NVIDIA-Container-Toolkit</u>
+
+※下記スクリプトは検証環境のシステム要件に従ったものです。実際の環境に合わせてインストールしてください   
+[Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+
+```bash
+# Install the prerequisites for the instructions below:
+sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+   curl \
+   gnupg2
+
+# Configure the production repository:
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+# Optionally, configure the repository to use experimental packages:
+sudo sed -i -e '/experimental/ s/^#//g' /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+# Update the packages list from the repository:
+sudo apt-get update
+
+# Install the NVIDIA Container Toolkit packages:
+export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.18.0-1
+  sudo apt-get install -y \
+      nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      nvidia-container-toolkit-base=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
+      libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+```
+
+```bash
+# create service config
+sudo touch /etc/docker/daemon.json
+
+# edit config
+sudo vim /etc/docker/daemon.json
+```
+
+```json
+// /etc/docker/daemon.json
+{
+  "runtimes": {
+    "nvidia": {
+      "path": "nvidia-container-runtime",
+      "runtimeArgs": []
+    }
+  },
+  "default-runtime": "nvidia"
+}
+```
+
+```bash
+# apply service config
+sudo systemctl daemon-reload
+
+# restart service
+sudo systemctl restart docker
 ```
 
 ## <u>リファレンス</u>

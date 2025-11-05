@@ -213,7 +213,7 @@ python3 src/model_scratch.py
 
 ```bash
 # 推論スクリプトの実行(オプション付き)
-uv run src/inference.py --model gpt_oss_compact.pt --prompt 'GPT models are' --max-tokens 20
+python3 src/inference.py --model gpt_oss_compact.pt --prompt 'GPT models are' --max-tokens 20
 ```
 
 ## <u>環境構築: Docker</u>
